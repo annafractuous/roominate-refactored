@@ -1,0 +1,2 @@
+class MatchConnectionsController < ApplicationController
+end

@@ -19,27 +19,23 @@
 class User < ActiveRecord::Base
   has_many :answers
   has_many :match_connections
-  has_many :matches, through: :match_connections
-
-  # after_update :update_viable_users, if: :determining_factors_changed?
-
-  attr_accessor :viable_users  # cache users who match desired city, age, gender, max rent
+  has_many :matches, through: :match_connections, dependent: :destroy
 
   def age
     (Date.today - self.birthday).to_i/365
   end
 
   def desired_birthday_range
-    Date.today - desired_max_age.years..Date.today - desired_min_age.years
+    age_range = self.desired_age_range.split("-").map(&:to_i) # [24,32]
+    (Date.today - age_range.last.years)..(Date.today - age_range.first.years)
   end
 
-  private
+  def good_matches
+    MatchConnection.joins(:user).where("match_connections.user_id = ? AND match_connections.score > ?", self.id, 25).map { |conn| conn.match }
+  end
 
-    def determining_factors_changed?
+  def find_matches
+    CompatibilityCalculator.find_matches(self)
+  end
 
-    end
-
-    def update_viable_users
-      CompatibilityCalculator.get_viable_users(self)
-    end
 end

@@ -1,25 +1,40 @@
 class CompatibilityCalculator
 
+  # ActiveJob & Sidekick –> background tasks
+  # Rails cache
+
   @@question_categories = Category.all
 
-  def self.get_viable_users(user)
-    city              = user.city
-    max_rent          = user.max_rent + 50
-    desired_genders   = user.desired_gender == "Any" ? ["M", "F", "Other"] : Array(user.desired_gender)
-    desired_age_range = user.desired_birthday_range
+  def self.update_inverse_match_scores
+    outdated_matches = MatchConnection.where("updated_at > ?", Time.now - 24.hours)
+    outdated_matches.each do |match|
+      inverse = MatchConnection.where(match_id: match.user_id, user_id: match.match_id)
+      inverse.update(score: match.score)
+    end
+  end
 
-    user.viable_users = User.where(:city => city, :max_rent => 0..max_rent, :gender => desired_genders, :birthday => desired_age_range).where.not(id: user.id)
+
+  def self.get_viable_users(user)
+    city                    = user.city
+    rent_range              = user.max_rent # "1000-1250"
+    desired_genders         = user.desired_gender == "Any" ? ["M", "F", "Other"] : Array(user.desired_gender)
+    desired_age_range       = user.desired_age_range
+    desired_birthday_range  = user.desired_birthday_range
+
+    cache_key = "#{city}|#{desired_genders}|#{desired_age_range}|#{rent_range}"
+
+    Rails.cache.fetch(cache_key, expires: 1.month) do
+      User.where(:city => city, :max_rent => rent_range, :gender => desired_genders, :birthday => desired_birthday_range).to_a
+    end
   end
 
 
   def self.find_matches(user)
-    set = user.viable_users || get_viable_users(user)
-
-    set.each_with_object([]) do |match, matches|
+    set = get_viable_users(user)
+    set.each do |match|
       compatibility_score = run_match_calculations(user, match)
       connection = user.match_connections.find_or_create_by(match: match)
-      connection.tap { |conn| conn.score = compatibility_score }.save
-      matches << match if compatibility_score > 25
+      connection.update(score: compatibility_score)
     end
   end
 

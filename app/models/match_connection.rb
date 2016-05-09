@@ -19,18 +19,13 @@ class MatchConnection < ActiveRecord::Base
 
   after_create :create_inverse, unless: :has_inverse?
   after_destroy :destroy_inverse, if: :has_inverse?
-  after_update :update_inverse
 
   def create_inverse
     self.class.create(inverse_match_options)
   end
 
-  def destroy_inverses
+  def destroy_inverse
     inverses.destroy_all
-  end
-
-  def update_inverse
-    inverse.score = self.score
   end
 
   def has_inverse?
@@ -38,7 +33,7 @@ class MatchConnection < ActiveRecord::Base
   end
 
   def inverse
-    self.class.where(inverse_match_options)
+    self.class.where(inverse_match_options).first
   end
 
   def inverse_match_options

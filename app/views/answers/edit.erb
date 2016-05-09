@@ -1,0 +1,10 @@
+<h2>Tell Us About Yourself</h2>
+<%= form_tag '/users/:user_id/answers/:id', method: :patch do %>
+  <% Question.all.each do |q| %>
+    <div class="user-question">
+      <%= label_tag q.question["user_text"] %>
+      <%= select_tag q.id, options_for_select(q.question["answers"].values.zip(q.question["answers"].keys)) %>
+    </div>
+  <% end %>
+  <%= submit_tag %>
+<% end %>

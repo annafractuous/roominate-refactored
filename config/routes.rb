@@ -1,8 +1,13 @@
+require 'sidekiq/web'
+
 Rails.application.routes.draw do
-  resources :users
-  resources :match_connections
-  resources :answers
-  resources :questions
+  resources :users do
+    resources :answers
+    get 'matches' => 'match_connections#index', as: 'matches'
+    get 'matches/:match_id' => 'match_connections#show', as: 'match'
+  end
+  mount Sidekiq::Web, at: '/sidekiq'
+end
 
 
   # The priority is based upon order of creation: first created -> highest priority.
@@ -59,4 +64,3 @@ Rails.application.routes.draw do
   #     # (app/controllers/admin/products_controller.rb)
   #     resources :products
   #   end
-end

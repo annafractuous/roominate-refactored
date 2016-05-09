@@ -1,0 +1,12 @@
+<h2 class="text-center">See Your Matches</h2>
+<div class="col-md-4 col-md-offset-4">
+  <% @matches.each do |match| %>
+      <div class="match-section">
+        <h4>
+          <%= link_to match.name, user_match_path(@user, match) %>
+          <span><%= @match_connections.find { |conn| conn.match == match }.score %>%</span>
+        </h4>
+        <em><%= match.age %> <%= match.gender %></em>
+      </div>
+  <% end %>
+</div>

@@ -1,0 +1,11 @@
+<div class="col-md-4 col-md-offset-1">
+  <h2><%= @match.name %></h2>
+  <h4><em><%= @match.age %> <%= @match.gender %></em></h4>
+  <div class="match-section">
+    <p>You are:</p>
+    <p><b><%= @cleanliness_compatibility %>%</b> compatible on cleanliness</p>
+    <p><b><%= @schedule_compatibility %>%</b> compatible on schedule</p>
+    <p><b><%= @habits_compatibility %>%</b> compatible on habits</p>
+  </div>
+  <%= link_to '← Back', user_matches_path(@user) %>
+</div>

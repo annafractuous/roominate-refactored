@@ -5,11 +5,10 @@
     name: Faker::Name.name,
     birthday: Faker::Date.between(32.years.ago, 24.years.ago),
     gender: ["M", "F"].sample,
-    max_rent: 1000,
+    max_rent: "1000-1250",
     city: ["New York City", "Pittsburgh"].sample,
     desired_gender: ["M", "F", "Any"].sample,
-    desired_min_age: 24,
-    desired_max_age: 32
+    desired_age_range: "24-32"
   )
 end
 
